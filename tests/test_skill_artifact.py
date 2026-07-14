@@ -22,6 +22,9 @@ class SkillArtifactTests(unittest.TestCase):
         self.assertNotIn("## Development", contents)
         self.assertNotIn("uv run", contents)
         self.assertNotIn("skills add .", contents)
+        self.assertNotIn("tests", contents)
+        self.assertNotIn("references/", contents)
+        self.assertNotIn("skills/post-queue-cli", contents)
 
     def test_frontmatter_uses_exact_public_name_and_activation_terms(self) -> None:
         contents = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")

@@ -16,22 +16,3 @@ contents of `skills/post-queue-cli/`; contributor tests are not installed.
 
 Create an API key at <https://post-queue.com/api-keys>, then follow the installed
 skill's `references/ENV.md` to save it in the skill's local `.env` file.
-
-## Development
-
-Runtime uses Python 3.11+ and only the standard library. Run tests from the
-repository root:
-
-```bash
-uv run python -m unittest discover -s tests -v
-uv run ruff check skills/post-queue-cli/scripts/post_queue.py tests
-```
-
-`unittest` is part of Python and runs the tests. Ruff is the only development
-package because it only checks formatting and code quality.
-
-Verify skill discovery:
-
-```bash
-npx --yes skills add . --list
-```

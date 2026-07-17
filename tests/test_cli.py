@@ -197,7 +197,7 @@ class AccountTests(unittest.TestCase):
         self.assertEqual(len(handler.requests), 1)
         request = handler.requests[0]
         self.assertEqual(request["method"], "GET")
-        self.assertEqual(request["path"], "/tenant/connected-accounts")
+        self.assertEqual(request["path"], "/v1/tenant/connected-accounts")
         self.assertEqual(request["headers"]["Authorization"], "Bearer test-api-key")
 
     def test_does_not_follow_authenticated_redirects(self) -> None:
@@ -258,7 +258,7 @@ class MediaTests(unittest.TestCase):
         self.assertEqual(len(handler.requests), 3)
         presign_request, upload_request, register_request = handler.requests
         self.assertEqual(presign_request["method"], "POST")
-        self.assertEqual(presign_request["path"], "/tenant/media-assets/presign")
+        self.assertEqual(presign_request["path"], "/v1/tenant/media-assets/presign")
         self.assertEqual(
             json.loads(presign_request["body"]),
             {
@@ -273,7 +273,7 @@ class MediaTests(unittest.TestCase):
         self.assertEqual(upload_request["headers"]["Content-Type"], "image/png")
         self.assertEqual(upload_request["body"], media_bytes)
         self.assertEqual(register_request["method"], "POST")
-        self.assertEqual(register_request["path"], "/tenant/media-assets")
+        self.assertEqual(register_request["path"], "/v1/tenant/media-assets")
         self.assertEqual(
             json.loads(register_request["body"]),
             {
@@ -373,7 +373,7 @@ class PostTests(unittest.TestCase):
 
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(json.loads(result.stdout), posts)
-        self.assertEqual([request["path"] for request in handler.requests], ["/tenant/jobs"])
+        self.assertEqual([request["path"] for request in handler.requests], ["/v1/tenant/jobs"])
 
     def test_lists_no_posts_without_detail_requests(self) -> None:
         with api_server([]) as (base_url, handler):
@@ -405,7 +405,7 @@ class PostTests(unittest.TestCase):
         self.assertEqual(json.loads(result.stdout)["group_id"], "group-1")
         request = handler.requests[0]
         self.assertEqual(request["method"], "POST")
-        self.assertEqual(request["path"], "/tenant/crossposts")
+        self.assertEqual(request["path"], "/v1/tenant/crossposts")
         self.assertEqual(json.loads(request["body"]), request_body)
         self.assertEqual(request["headers"]["Content-Type"], "application/json")
 
@@ -416,7 +416,7 @@ class PostTests(unittest.TestCase):
 
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(handler.requests[0]["method"], "GET")
-        self.assertEqual(handler.requests[0]["path"], "/tenant/posts/group-1")
+        self.assertEqual(handler.requests[0]["path"], "/v1/tenant/posts/group-1")
 
     def test_updates_scheduled_post_by_merging_current_state(self) -> None:
         request_body = {
@@ -465,7 +465,7 @@ class PostTests(unittest.TestCase):
             {"deleted": True, "resource": "post", "id": "group-1"},
         )
         self.assertEqual(handler.requests[0]["method"], "DELETE")
-        self.assertEqual(handler.requests[0]["path"], "/tenant/posts/group-1")
+        self.assertEqual(handler.requests[0]["path"], "/v1/tenant/posts/group-1")
 
 
 class QueueTests(unittest.TestCase):
@@ -486,7 +486,7 @@ class QueueTests(unittest.TestCase):
 
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(handler.requests[0]["method"], "POST")
-        self.assertEqual(handler.requests[0]["path"], "/tenant/post-queues")
+        self.assertEqual(handler.requests[0]["path"], "/v1/tenant/post-queues")
         body = json.loads(handler.requests[0]["body"])
         self.assertEqual(body["name"], "Daily")
         self.assertEqual(body["schedule"], {"kind": "interval", "interval_minutes": 1440})
@@ -497,7 +497,7 @@ class QueueTests(unittest.TestCase):
 
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(handler.requests[0]["method"], "GET")
-        self.assertEqual(handler.requests[0]["path"], "/tenant/post-queues")
+        self.assertEqual(handler.requests[0]["path"], "/v1/tenant/post-queues")
 
     def test_gets_queue(self) -> None:
         with api_server({"queue": {"id": "queue-1"}, "items": []}) as (
@@ -508,7 +508,7 @@ class QueueTests(unittest.TestCase):
 
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(handler.requests[0]["method"], "GET")
-        self.assertEqual(handler.requests[0]["path"], "/tenant/post-queues/queue-1")
+        self.assertEqual(handler.requests[0]["path"], "/v1/tenant/post-queues/queue-1")
 
     def test_updates_queue_by_merging_current_state(self) -> None:
         updated = {
@@ -545,7 +545,7 @@ class QueueTests(unittest.TestCase):
             {"deleted": True, "resource": "queue", "id": "queue-1"},
         )
         self.assertEqual(handler.requests[0]["method"], "DELETE")
-        self.assertEqual(handler.requests[0]["path"], "/tenant/post-queues/queue-1")
+        self.assertEqual(handler.requests[0]["path"], "/v1/tenant/post-queues/queue-1")
 
 
 class QueueItemTests(unittest.TestCase):
@@ -567,7 +567,7 @@ class QueueItemTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(handler.requests[0]["method"], "POST")
         self.assertEqual(
-            handler.requests[0]["path"], "/tenant/post-queues/queue-1/items"
+            handler.requests[0]["path"], "/v1/tenant/post-queues/queue-1/items"
         )
         self.assertEqual(json.loads(handler.requests[0]["body"]), body)
 
@@ -590,7 +590,7 @@ class QueueItemTests(unittest.TestCase):
         self.assertEqual(handler.requests[0]["method"], "GET")
         self.assertEqual(
             handler.requests[1]["path"],
-            "/tenant/post-queues/queue-1/items/item-1",
+            "/v1/tenant/post-queues/queue-1/items/item-1",
         )
         self.assertEqual(json.loads(handler.requests[1]["body"]), body)
 
@@ -624,7 +624,7 @@ class QueueItemTests(unittest.TestCase):
         self.assertEqual(handler.requests[0]["method"], "DELETE")
         self.assertEqual(
             handler.requests[0]["path"],
-            "/tenant/post-queues/queue-1/items/item-1",
+            "/v1/tenant/post-queues/queue-1/items/item-1",
         )
 
 
@@ -683,7 +683,7 @@ class ErrorContractTests(unittest.TestCase):
 
         with mock.patch.object(opener, "open", side_effect=TimeoutError):
             with self.assertRaises(namespace["CliError"]) as raised:
-                namespace["request_json"](config, "GET", "/tenant/connected-accounts")
+                namespace["request_json"](config, "GET", "/v1/tenant/connected-accounts")
 
         self.assertEqual(raised.exception.error_type, "network")
         self.assertNotIn("test-api-key", json.dumps(raised.exception.payload()))

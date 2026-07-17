@@ -12,7 +12,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-DEFAULT_BASE_URL = "https://api.post-queue.com"
+DEFAULT_BASE_URL = "https://public-api.post-queue.com"
+API_PREFIX = "/v1"
 CONFIG_PATH = Path(__file__).resolve().parent.parent / ".env"
 REQUEST_TIMEOUT_SECONDS = 30.0
 MAX_RESPONSE_BYTES = 10 * 1024 * 1024
@@ -89,7 +90,7 @@ def validate_base_url(value: str) -> str:
     is_loopback_origin = is_loopback and parsed.scheme in {"http", "https"}
     is_production_origin = (
         parsed.scheme == "https"
-        and parsed.hostname == "api.post-queue.com"
+        and parsed.hostname == "public-api.post-queue.com"
         and port in {None, 443}
     )
     if not is_production_origin and not is_loopback_origin:
@@ -309,7 +310,7 @@ def request_json(
     if data is not None:
         headers["Content-Type"] = "application/json"
     request = urllib.request.Request(
-        f"{config.base_url}{path}",
+        f"{config.base_url}{API_PREFIX}{path}",
         method=method,
         headers=headers,
         data=data,
